@@ -1,0 +1,29 @@
+{
+  "name": "computer-zone",
+  "version": "0.0.1",
+  "description": "Just a zone for computers",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "node-uuid": "^1.4.8",
+    "socket.io": "^2.0.4"
+  },
+  "engines": {
+    "node": "8.x"
+  },
+  "repository": {
+    "url": "https://glitch.com/edit/#!/computer-zone"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch",
+    "express",
+    "sockets",
+    "socket.io"
+  ]
+}
