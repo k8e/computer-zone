@@ -42,9 +42,6 @@ app.get('/*', function(req, res, next) {
 
 });
 
-//  " Express and socket.io can work together to serve the socket.io client files "
-//  " This way, when the client requests '/socket.io/' files, socket.io determines what the client needs. "
-
 /* Socket.IO server set up. */
 
 // Create a socket.io instance using our express server
