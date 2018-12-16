@@ -54,7 +54,7 @@ socket.on("motion", function(event) {
     if (!(event.x && event.y) || !event.userId) return;
 
     // Create a cursor for newcomer
-    if (!friends[event.userId])
+    if (!friends[event.userId] && event.userId != id)
         createNewCursor(event.userId);
 
     // Move cursor
