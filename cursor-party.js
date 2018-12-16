@@ -11,6 +11,11 @@ var hasCursor = false;
 var myCursor = document.createElement('div');
     myCursor.className = "cursor";
 
+var cursorOffset = {
+    top: 10,
+    left: 10,
+};
+
 // Other clients
 var friends = {};
 
@@ -26,9 +31,10 @@ var mouseMove = function(event) {
     }
 
     // Move cursor
-    moveCursor(myCursor,
-        event.clientX + window.pageXOffset,
-        event.clientY + window.pageYOffset
+    moveCursor(
+        myCursor,
+        event.clientX + window.pageXOffset + cursorOffset.left,
+        event.clientY + window.pageYOffset + cursorOffset.top
     );
 
     // Send update to server
@@ -88,7 +94,7 @@ function createNewCursor(userId) {
 
 function moveCursor(icon, x, y) {
     if (icon) {
-        icon.style.left = "" + x + "px";
-        icon.style.top = "" + y + "px";
+        icon.style.left = x + 'px';
+        icon.style.top = y + 'px';
     }
 };
