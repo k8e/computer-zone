@@ -2,6 +2,8 @@
  * Cursor Party Client Script
 **/
 
+const container = document.body;
+
 // From socket.io.js
 const socket = io();
 
@@ -20,32 +22,69 @@ var cursorOffset = {
 var friends = {};
 
 // Override browser's onmousemove event
-var mouseMove = function(event) {
-    event = event || window.event;
+document.addEventListener("mousemove", function(event) {
+    var pos = {
+        x: event.clientX + cursorOffset.left,
+        y: event.clientY + cursorOffset.top
+    };
 
-    // If first movement create a cursor
-    if (id && !hasCursor && event.clientX && event.clientY) {
-        document.body.appendChild(myCursor);
-        document.body.style.cursor = "none";
+    if (!pos.x || !pos.y)
+    return;
+
+    // If first movement, create a cursor
+    if (!hasCursor) {
+        container.appendChild(myCursor);
         hasCursor = true;
     }
 
     // Move cursor
-    moveCursor(
-        myCursor,
-        event.clientX + window.pageXOffset + cursorOffset.left,
-        event.clientY + window.pageYOffset + cursorOffset.top
+    moveCursor(myCursor,
+        pos.x + window.pageXOffset,
+        pos.y + window.pageYOffset
     );
 
     // Send update to server
     socket.emit("motion", {
         userId: id,
-        x: event.clientX  + window.pageXOffset ,
-        y: event.clientY + window.pageYOffset 
+        x: pos.x + window.pageXOffset,
+        y: pos.y + window.pageYOffset 
     });
-};
-document.onmousemove = mouseMove;
 
+    event.preventDefault();
+}, false);
+
+// Handle mobile touch events
+document.addEventListener("touchmove", function(event) {
+    var touch = event.changedTouches[0];
+    var pos = {
+        x: touch.pageX,
+        y: touch.pageY
+    };
+
+    if (!pos.x || !pos.y)
+        return;
+
+    // If first movement, create a cursor
+    if (!hasCursor) {
+        container.appendChild(myCursor);
+        hasCursor = true;
+    }
+
+    // Move cursor
+    moveCursor(myCursor,
+        pos.x + window.pageXOffset,
+        pos.y + window.pageYOffset
+    );
+
+    // Send update to server
+    socket.emit("motion", {
+        userId: id,
+        x: pos.x + window.pageXOffset,
+        y: pos.y + window.pageYOffset 
+    });
+
+    event.preventDefault(); // prevent scrolling
+}, {passive: false});
 
 /* Listen for socket events */
 
