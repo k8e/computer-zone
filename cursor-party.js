@@ -19,7 +19,7 @@ var cursorOffset = {
 };
 
 // Other clients
-var friends = {};
+var pals = {};
 
 // Override browser's onmousemove event
 document.addEventListener("mousemove", function(event) {
@@ -92,6 +92,13 @@ document.addEventListener("touchmove", function(event) {
 socket.on("connection_established", function(info) {
     // Retrieve user ID from server
     id = info.id;
+
+    // Retrieve existing pals
+    for (var userId in info.allPals) {
+        var pal = info.allPals[userId];
+        createNewCursor(userId);
+        moveCursor(pals[userId], pal.x, pal.y);
+    }
 });
 
 // Client mouse movement
@@ -99,11 +106,11 @@ socket.on("motion", function(event) {
     if (!(event.x && event.y) || !event.userId) return;
 
     // Create a cursor for newcomer
-    if (!friends[event.userId] && event.userId != id)
+    if (!pals[event.userId] && event.userId != id)
         createNewCursor(event.userId);
 
     // Move cursor
-    moveCursor(friends[event.userId], event.x, event.y);
+    moveCursor(pals[event.userId], event.x, event.y);
 });
 
 // Another client arrives
@@ -114,11 +121,11 @@ socket.on("arrival", function(arriver) {
 // A client disconnects
 socket.on("departure", function(event) {
     var userId = event.id;
-    var delCursor = friends[userId];
+    var delCursor = pals[userId];
 
     // Remove cursor
     delCursor.parentElement.removeChild(delCursor);
-    delete friends[userId];
+    delete pals[userId];
 });
 
 
@@ -127,8 +134,8 @@ socket.on("departure", function(event) {
 function createNewCursor(userId) {
     var newCursor = document.createElement('div');
     newCursor.className = "cursor";
-    friends[userId] = newCursor;
-    document.body.appendChild(friends[userId]);
+    pals[userId] = newCursor;
+    container.appendChild(pals[userId]);
 }
 
 function moveCursor(icon, x, y) {

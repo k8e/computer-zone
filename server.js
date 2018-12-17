@@ -16,6 +16,9 @@ var
     app = express(),
     server = http.createServer(app);
 
+// All our pals
+var pals = {};
+
 /* Express server set up. */
 
 // Tell the server to listen for incoming connections
@@ -49,20 +52,28 @@ var io = socketIO.listen(server);
 
 // Socket.io will call this function when a client connects
 io.sockets.on('connection', function(client) {
-  
-    //Generate a new UUID and attach it to their socket/connection
-    client.userid = UUID();
 
-    // Send connection feedback with id to the client
+    // Generate a new UUID and attach it to their socket/connection
+    client.userId = UUID();
+
+    // Send connection feedback with id and existing pals
     client.emit('connection_established', {
-        id: client.userid
+        id: client.userId,
+        allPals: pals
     });
+
+    console.log("✧ Pal " + client.userId + " connected.");
+
+    // Add new client to the pal list
+    pals[client.userId] = {
+        x: 0,
+        y: 0
+    };
 
     // Announce arrival to all connected clients
     io.emit("arrival", {
-        id: client.userid
+        id: client.userId
     });
-    console.log("✧ Pal " + client.userid + " connected.");
 
     /* Listen for more client events */
 
@@ -70,15 +81,23 @@ io.sockets.on('connection', function(client) {
     client.on("motion", function(info) {
         // Update all clients
         io.emit("motion", info);
+
+        // Update this client in the pal list
+        pals[info.userId] = {
+            x: info.x,
+            y: info.y
+        };
     });
 
     // Client disconnect
     client.on('disconnect', function() {
+        // Delete this client from list
+        delete pals[client.userId];
         // Announce to all clients
         io.emit("departure", {
-            id: client.userid
+            id: client.userId
         });
-        console.log("✧ Pal " + client.userid + " disconnected.");
+        console.log("✧ Pal " + client.userId + " disconnected.");
     });
 
 });
