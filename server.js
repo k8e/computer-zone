@@ -53,26 +53,43 @@ var io = socketIO.listen(server);
 // Socket.io will call this function when a client connects
 io.sockets.on('connection', function(client) {
 
-    // Generate a new UUID and attach it to their socket/connection
-    client.userId = UUID();
+    // Request client info
+    client.emit("handshake", function(response) {
+        if (!response) return;
 
-    // Send connection feedback with id and existing pals
-    client.emit('connection_established', {
-        id: client.userId,
-        allPals: pals
-    });
+        let clientX = 0, 
+            clientY = 0;
 
-    console.log("✧ Pal " + client.userId + " connected.");
+        // Receive info from client (in case of reconnection)
+        if (!response.userId) {
+            client.userId = response.userId;
+            clientX = response.x;
+            clientY = response.y
+        }
+        // Set up brand new client
+        else {
+            // Generate a new UUID and attach it to their socket/connection
+            client.userId = UUID();
 
-    // Add new client to the pal list
-    pals[client.userId] = {
-        x: 0,
-        y: 0
-    };
+            // Send connection feedback with id and existing pals
+            client.emit('connection_established', {
+                id: client.userId,
+                allPals: pals
+            });
 
-    // Announce arrival to all connected clients
-    io.emit("arrival", {
-        id: client.userId
+            // Announce arrival to all connected clients
+            io.emit("arrival", {
+                id: client.userId
+            });
+        }
+
+        // Add client to the pal list
+        pals[client.userId] = {
+            x: clientX,
+            y: clientY
+        };
+
+        console.log("✧ Pal " + client.userId + " connected.");
     });
 
     /* Listen for more client events */

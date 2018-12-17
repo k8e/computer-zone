@@ -8,7 +8,9 @@ const container = document.body;
 const socket = io();
 
 // Client info
-var id;
+var id, 
+    posX = 0, 
+    posY = 0;
 var hasCursor = false;
 var myCursor = document.createElement('div');
     myCursor.className = "cursor";
@@ -23,45 +25,10 @@ var pals = {};
 
 // Override browser's onmousemove event
 document.addEventListener("mousemove", function(event) {
-    var pos = {
-        x: event.clientX + cursorOffset.left,
-        y: event.clientY + cursorOffset.top
-    };
+    posX = event.clientX + cursorOffset.left;
+    posY = event.clientY + cursorOffset.top;
 
-    if (!pos.x || !pos.y)
-    return;
-
-    // If first movement, create a cursor
-    if (!hasCursor) {
-        container.appendChild(myCursor);
-        hasCursor = true;
-    }
-
-    // Move cursor
-    moveCursor(myCursor,
-        pos.x + window.pageXOffset,
-        pos.y + window.pageYOffset
-    );
-
-    // Send update to server
-    socket.emit("motion", {
-        userId: id,
-        x: pos.x + window.pageXOffset,
-        y: pos.y + window.pageYOffset 
-    });
-
-    event.preventDefault();
-}, false);
-
-// Handle mobile touch events
-document.addEventListener("touchmove", function(event) {
-    var touch = event.changedTouches[0];
-    var pos = {
-        x: touch.pageX,
-        y: touch.pageY
-    };
-
-    if (!pos.x || !pos.y)
+    if (!posX || !posY)
         return;
 
     // If first movement, create a cursor
@@ -72,15 +39,46 @@ document.addEventListener("touchmove", function(event) {
 
     // Move cursor
     moveCursor(myCursor,
-        pos.x + window.pageXOffset,
-        pos.y + window.pageYOffset
+        posX + window.pageXOffset,
+        posY + window.pageYOffset
     );
 
     // Send update to server
     socket.emit("motion", {
         userId: id,
-        x: pos.x + window.pageXOffset,
-        y: pos.y + window.pageYOffset 
+        x: posX + window.pageXOffset,
+        y: posY + window.pageYOffset 
+    });
+
+    event.preventDefault();
+}, false);
+
+// Handle mobile touch events
+document.addEventListener("touchmove", function(event) {
+    var touch = event.changedTouches[0];
+    posX = touch.pageX;
+    posY = touch.pageY;
+
+    if (!posX || !posY)
+        return;
+
+    // If first movement, create a cursor
+    if (!hasCursor) {
+        container.appendChild(myCursor);
+        hasCursor = true;
+    }
+
+    // Move cursor
+    moveCursor(myCursor,
+        posX + window.pageXOffset,
+        posY + window.pageYOffset
+    );
+
+    // Send update to server
+    socket.emit("motion", {
+        userId: id,
+        x: posX + window.pageXOffset,
+        y: posY + window.pageYOffset 
     });
 
     event.preventDefault(); // prevent scrolling
@@ -99,6 +97,17 @@ socket.on("connection_established", function(info) {
         createNewCursor(userId);
         moveCursor(pals[userId], pal.x, pal.y);
     }
+});
+
+// New connection? Possibly server reconnection
+socket.on("handshake", function(callback) {
+    // Pull together whatever data we can send to the server
+    var clientInfo = {
+        userId: id || null,
+        x: posX || null,
+        y: posY || null
+    }
+    callback(clientInfo);
 });
 
 // Client mouse movement
