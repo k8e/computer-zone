@@ -45,7 +45,6 @@ document.addEventListener("mousemove", function(event) {
 
     // Send update to server
     socket.emit("motion", {
-        userId: id,
         x: posX + window.pageXOffset,
         y: posY + window.pageYOffset 
     });
@@ -76,7 +75,6 @@ document.addEventListener("touchmove", function(event) {
 
     // Send update to server
     socket.emit("motion", {
-        userId: id,
         x: posX + window.pageXOffset,
         y: posY + window.pageYOffset 
     });

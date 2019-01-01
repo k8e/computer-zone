@@ -96,14 +96,18 @@ io.sockets.on('connection', function(client) {
 
     // Client motion
     client.on("motion", function(info) {
-        // Update all clients
-        io.emit("motion", info);
+        if (pals[client.userId]) {
+            // Update all clients
+            io.emit("motion", {
+                userId: client.userId,
+                x: info.x,
+                y: info.y
+            });
 
-        // Update this client in the pal list
-        pals[info.userId] = {
-            x: info.x,
-            y: info.y
-        };
+            // Update this client in the pal list
+            pals[client.userId].x = info.x;
+            pals[client.userId].y = info.x;
+        }
     });
 
     // Client disconnect
