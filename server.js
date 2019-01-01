@@ -60,13 +60,13 @@ io.sockets.on('connection', function(client) {
         let clientX = 0, 
             clientY = 0;
 
-        // Receive info from client (in case of reconnection)
-        if (!response.userId) {
+        // Client has user ID already, so receive info (reconnection)
+        if (response.userId) {
             client.userId = response.userId;
             clientX = response.x;
             clientY = response.y
         }
-        // Set up brand new client
+        // New client; set up new user
         else {
             // Generate a new UUID and attach it to their socket/connection
             client.userId = UUID();
